@@ -1,9 +1,9 @@
 import zstandard as zstd
 
-from Read_file import read_text_from_file
+from read_file import read_text_from_file
 
 # Przykładowe dane
-text = read_text_from_file('Polski_Puchatek.txt')
+text = read_text_from_file('data/Polski_Puchatek.txt')
 
 # Konwersja tekstu na bajty
 data = text.encode('utf-8')

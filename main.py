@@ -1,8 +1,8 @@
 import struct
-from ANS import test_tans
-from Arythmetic_Code import arithmetic_encode
-from Huffman_Code import huffman_encode
-from Read_file import read_text_from_file
+from ans import test_tans
+from arythmetic_code import arithmetic_encode
+from huffman_code import huffman_encode
+from read_file import read_text_from_file
 from test_compression import compression_ratio
 from test_entropy import calculate_entropy
 from test_measure_cpu_usage import measure_cpu_usage
@@ -13,13 +13,13 @@ from text_execution_time import test_execution_time_func
 
 if __name__ == '__main__':
     texts ={
-        "Polish": read_text_from_file('Polski_Puchatek.txt'),
-        "English":read_text_from_file('English_Puchatek.txt'),
-        "French": read_text_from_file('French_Puchatek.txt'),
-        "Hungary":read_text_from_file('Hungary_Puchatek.txt')
+        "Polish": read_text_from_file('data/Polski_Puchatek.txt'),
+        "English":read_text_from_file('data/English_Puchatek.txt'),
+        "French": read_text_from_file('data/French_Puchatek.txt'),
+        "Hungary":read_text_from_file('data/Hungary_Puchatek.txt')
     }
 
-    text = read_text_from_file('Polski_Puchatek.txt')
+    text = read_text_from_file('data/Polski_Puchatek.txt')
     print("Puchatek po polsku")
     entropy = calculate_entropy(text)
     print(f"Entropy of polish text: {entropy:.5f} bits per symbol")

@@ -1,5 +1,6 @@
 import struct
-from ans import test_tans
+import os
+from ans import test_tans, tans_encode, tans_encode, build_tans_table
 from arythmetic_code import arithmetic_encode
 from huffman_code import huffman_encode
 from read_file import read_text_from_file
@@ -10,111 +11,91 @@ from test_memory_usage import test_memory_usage_func
 from test_stability import stability_test
 from text_execution_time import test_execution_time_func
 
+def ensure_results_dir():
+    os.makedirs("results", exist_ok=True)
+
+# Funkcja do zapisywania wyników do pliku
+def save_results_to_file(filename, results):
+    ensure_results_dir()
+    with open(os.path.join("results", filename), "w") as file:
+        for key, value in results.items():
+            file.write(f"{key}: {value}\n")
 
 if __name__ == '__main__':
-    texts ={
+    texts = {
         "Polish": read_text_from_file('data/Polski_Puchatek.txt'),
-        "English":read_text_from_file('data/English_Puchatek.txt'),
+        "English": read_text_from_file('data/English_Puchatek.txt'),
         "French": read_text_from_file('data/French_Puchatek.txt'),
-        "Hungary":read_text_from_file('data/Hungary_Puchatek.txt')
+        "Hungary": read_text_from_file('data/Hungary_Puchatek.txt')
     }
 
-    text = read_text_from_file('data/Polski_Puchatek.txt')
-    print("Puchatek po polsku")
-    entropy = calculate_entropy(text)
-    print(f"Entropy of polish text: {entropy:.5f} bits per symbol")
-    original_size = len(text.encode('utf-8'))  # Rozmiar oryginalny w bajtach
-    # Testowanie Huffman
-    compressed_huffman, codebook =  huffman_encode(text)
-    huffman_time = test_execution_time_func(huffman_encode, text)
-    huffman_memory = test_memory_usage_func(huffman_encode, text)
-    huffman_entropy = calculate_entropy(compressed_huffman)
-    huffman_stability = stability_test(huffman_encode,text,100)
-    huffman_cpu_usage = measure_cpu_usage(huffman_encode, text)
-    huffman_compressed_size = len(compressed_huffman) / 8  # Rozmiar skompresowany w bajtach
-    huffman_ratio = compression_ratio(original_size, huffman_compressed_size)
-    # Testowanie kodowanie arytmetyczne
-    encoded_arithmetic = arithmetic_encode(text)
-    arithmetic_time = test_execution_time_func(arithmetic_encode,text)
-    arithmetic_memory = test_memory_usage_func(arithmetic_encode,text)
-    entropy_arithmetic = calculate_entropy(str(encoded_arithmetic))
-    stability_entropy = stability_test(arithmetic_encode,text,100)
-    arithmetic_cpu_usage = measure_cpu_usage(arithmetic_encode, text)
-    compressed_binary = struct.pack('d', encoded_arithmetic)  # 'd' oznacza double (8 bajtów)
-    arithmetic_compressed_size = len(compressed_binary)  # Rozmiar w bajtach
-    arithmetic_ratio = compression_ratio(original_size, arithmetic_compressed_size)
-    # Porównanie wyników
-    print(f"Huffman compression time: {huffman_time:.5f} seconds")
-    print(f"Compressed Huffman size: {len(compressed_huffman)} bits")
-    print(f"Huffman compression memory usage: {huffman_memory:.5f} MiB")
-    print(f"Entropy after Huffman compression: {huffman_entropy:.5f} bits per symbol")
-    print(f"Huffman stability: mean={huffman_stability[0]:.5f}, min={huffman_stability[1]:.5f}, max={huffman_stability[2]:.5f} seconds")
-    print(f"Huffman cpu usage: {huffman_cpu_usage}")
-    print(f"Huffman ratio: {huffman_ratio}")
-    print(f"Arithmetic encoding value: {encoded_arithmetic}")
-    print(f"Arithmetic encoding time: {arithmetic_time:.5f} seconds")
-    print(f"Arithmetic encoding memory usage: {arithmetic_memory:.5f} MiB")
-    print(f"Entropy after Arithmetic compression: {entropy_arithmetic:.5f} bits per symbol")
-    print(f"Entropy stability: mean={stability_entropy[0]:.5f}, min={stability_entropy[1]:.5f}, max={stability_entropy[2]:.5f} seconds")
-    print(f"Arithmetic cpu usage: {arithmetic_cpu_usage}")
-    print(f"Arithmetic ratio: {arithmetic_ratio}")
+    for language, text in texts.items():
+        print(f"Processing {language} text")
 
-    test_tans(text)
+        results = {"Language": language}
+        entropy = calculate_entropy(text)
+        results["Entropy"] = f"{entropy:.5f} bits per symbol"
 
-#text = read_text_from_file('Hungary_Puchatek.txt')
-#print("Puchatek po węgiersku")
-# Testowanie Huffman
-#start_time = time.time()
-#compressed_huffman, codebook =  huffman_encode(text)
-#huffman_time = time.time() - start_time
+        original_size = len(text.encode('utf-8'))  # Rozmiar oryginalny w bajtach
 
-# Testowanie kodowanie arytmetyczne
-#start_time = time.time()
-#encoded_arithmetic = arithmetic_encode(text)
-#arithmetic_time = time.time() - start_time
+        # Testowanie Huffman
+        compressed_huffman, codebook = huffman_encode(text)
+        huffman_time = test_execution_time_func(huffman_encode, text)
+        huffman_memory = test_memory_usage_func(huffman_encode, text)
+        huffman_entropy = calculate_entropy(compressed_huffman)
+        huffman_stability = stability_test(huffman_encode, text, 100)
+        huffman_cpu_usage = measure_cpu_usage(huffman_encode, text)
+        huffman_compressed_size = len(compressed_huffman) / 8  # Rozmiar skompresowany w bajtach
+        huffman_ratio = compression_ratio(original_size, huffman_compressed_size)
 
-# Porównanie wyników
-#print(f"Huffman compression time: {huffman_time} seconds")
-#print(f"Arithmetic encoding time: {arithmetic_time} seconds")
-#print(f"Compressed Huffman size: {len(compressed_huffman)} bits")
-##print(f"Arithmetic encoding value: {encoded_arithmetic}")
+        # Zapisz wyniki Huffman
+        results["Huffman Time"] = f"{huffman_time:.5f} seconds"
+        results["Huffman Memory Usage"] = f"{huffman_memory:.5f} MiB"
+        results["Huffman Entropy"] = f"{huffman_entropy:.5f} bits per symbol"
+        results["Huffman Stability"] = f"mean={huffman_stability[0]:.5f}, min={huffman_stability[1]:.5f}, max={huffman_stability[2]:.5f} seconds"
+        results["Huffman CPU Usage"] = huffman_cpu_usage
+        results["Huffman Ratio"] = huffman_ratio
 
+        # Testowanie kodowanie arytmetyczne
+        encoded_arithmetic = arithmetic_encode(text)
+        arithmetic_time = test_execution_time_func(arithmetic_encode, text)
+        arithmetic_memory = test_memory_usage_func(arithmetic_encode, text)
+        entropy_arithmetic = calculate_entropy(str(encoded_arithmetic))
+        stability_entropy = stability_test(arithmetic_encode, text, 100)
+        arithmetic_cpu_usage = measure_cpu_usage(arithmetic_encode, text)
+        compressed_binary = struct.pack('d', encoded_arithmetic)  # 'd' oznacza double (8 bajtów)
+        arithmetic_compressed_size = len(compressed_binary)  # Rozmiar w bajtach
+        arithmetic_ratio = compression_ratio(original_size, arithmetic_compressed_size)
 
-#text = read_text_from_file('English_Puchatek.txt')
-#print("Puchatek po angielsku")
+        # Zapisz wyniki kodowanie arytmetyczne
+        results["Arithmetic Time"] = f"{arithmetic_time:.5f} seconds"
+        results["Arithmetic Memory Usage"] = f"{arithmetic_memory:.5f} MiB"
+        results["Arithmetic Entropy"] = f"{entropy_arithmetic:.5f} bits per symbol"
+        results["Arithmetic Stability"] = f"mean={stability_entropy[0]:.5f}, min={stability_entropy[1]:.5f}, max={stability_entropy[2]:.5f} seconds"
+        results["Arithmetic CPU Usage"] = arithmetic_cpu_usage
+        results["Arithmetic Ratio"] = arithmetic_ratio
 
-# Testowanie Huffman
-#start_time = time.time()
-#compressed_huffman, codebook =  huffman_encode(text)
-#huffman_time = time.time() - start_time
+                # Testowanie ANS
+        ans_table = build_tans_table(text)
+        encoded_ans_state, encoded_ans = tans_encode(text, ans_table)
+        ans_time = test_execution_time_func(tans_encode, text, ans_table)
+        ans_memory = test_memory_usage_func(tans_encode, text, ans_table)
+        entropy_ans = calculate_entropy(str(encoded_ans))
+        ans_stability = stability_test(lambda t: tans_encode(t, ans_table), text, 100)
+        ans_cpu_usage = measure_cpu_usage(tans_encode, text, ans_table)
+        ans_compressed_size = len(encoded_ans)  # Rozmiar w bajtach (dlugosc listy)
+        ans_ratio = compression_ratio(original_size, ans_compressed_size)
 
-# Testowanie kodowanie arytmetyczne
-#start_time = time.time()
-#encoded_arithmetic = arithmetic_encode(text)
-#arithmetic_time = time.time() - start_time
-
-# Porównanie wyników
-#print(f"Huffman compression time: {huffman_time} seconds")
-#print(f"Arithmetic encoding time: {arithmetic_time} seconds")
-#print(f"Compressed Huffman size: {len(compressed_huffman)} bits")
-#print(f"Arithmetic encoding value: {encoded_arithmetic}")
+        # Zapisz wyniki ANS
+        results["ANS Time"] = f"{ans_time:.5f} seconds"
+        results["ANS Memory Usage"] = f"{ans_memory:.5f} MiB"
+        results["ANS Entropy"] = f"{entropy_ans:.5f} bits per symbol"
+        results["ANS Stability"] = f"mean={ans_stability[0]:.5f}, min={ans_stability[1]:.5f}, max={ans_stability[2]:.5f} seconds"
+        results["ANS CPU Usage"] = ans_cpu_usage
+        results["ANS Ratio"] = ans_ratio
 
 
-#text = read_text_from_file('French_Puchatek.txt')
-#print("Puchatek po francusku")
-
-# Testowanie Huffman
-#start_time = time.time()
-#compressed_huffman, codebook =  huffman_encode(text)
-#huffman_time = time.time() - start_time
-
-# Testowanie kodowanie arytmetyczne
-#start_time = time.time()
-#encoded_arithmetic = arithmetic_encode(text)
-#arithmetic_time = time.time() - start_time
-
-# Porównanie wyników
-#print(f"Huffman compression time: {huffman_time} seconds")
-#print(f"Arithmetic encoding time: {arithmetic_time} seconds")
-#print(f"Compressed Huffman size: {len(compressed_huffman)} bits")
-#print(f"Arithmetic encoding value: {encoded_arithmetic}")
+        # Zapisz wyniki do pliku
+        filename = f"results_{language.lower()}.txt"
+        save_results_to_file(filename, results)
+        print(f"Results for {language} saved to {filename}\n")

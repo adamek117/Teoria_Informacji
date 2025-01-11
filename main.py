@@ -1,8 +1,8 @@
 import struct
 import os
-from ans import test_tans, tans_encode, tans_encode, build_tans_table
-from arythmetic_code import arithmetic_encode
-from huffman_code import huffman_encode
+from ans import test_tans, tans_encode, tans_decode, build_tans_table
+from arythmetic_code import arithmetic_encode, arithmetic_decode
+from huffman_code import huffman_encode, huffman_decode
 from read_file import read_text_from_file
 from test_compression import compression_ratio
 from test_entropy import calculate_entropy
@@ -47,6 +47,7 @@ if __name__ == '__main__':
         huffman_cpu_usage = measure_cpu_usage(huffman_encode, text)
         huffman_compressed_size = len(compressed_huffman) / 8  # Rozmiar skompresowany w bajtach
         huffman_ratio = compression_ratio(original_size, huffman_compressed_size)
+        print(f"Decoded Huffman: {huffman_decode(compressed_huffman, codebook)}")
 
         # Zapisz wyniki Huffman
         results["Huffman Time"] = f"{huffman_time:.5f} seconds"
@@ -57,7 +58,8 @@ if __name__ == '__main__':
         results["Huffman Ratio"] = huffman_ratio
 
         # Testowanie kodowanie arytmetyczne
-        encoded_arithmetic = arithmetic_encode(text)
+        encoded_arithmetic, arithmetic_prob = arithmetic_encode(text)
+        print(f"Encoded arithmetic: {encoded_arithmetic}")
         arithmetic_time = test_execution_time_func(arithmetic_encode, text)
         arithmetic_memory = test_memory_usage_func(arithmetic_encode, text)
         entropy_arithmetic = calculate_entropy(str(encoded_arithmetic))
@@ -66,6 +68,7 @@ if __name__ == '__main__':
         compressed_binary = struct.pack('d', encoded_arithmetic)  # 'd' oznacza double (8 bajtów)
         arithmetic_compressed_size = len(compressed_binary)  # Rozmiar w bajtach
         arithmetic_ratio = compression_ratio(original_size, arithmetic_compressed_size)
+        print(f"Decoded arithmetic: {arithmetic_decode(encoded_arithmetic, len(text), arithmetic_prob )}")
 
         # Zapisz wyniki kodowanie arytmetyczne
         results["Arithmetic Time"] = f"{arithmetic_time:.5f} seconds"
@@ -75,7 +78,7 @@ if __name__ == '__main__':
         results["Arithmetic CPU Usage"] = arithmetic_cpu_usage
         results["Arithmetic Ratio"] = arithmetic_ratio
 
-                # Testowanie ANS
+        # Testowanie ANS
         ans_table = build_tans_table(text)
         encoded_ans_state, encoded_ans = tans_encode(text, ans_table)
         ans_time = test_execution_time_func(tans_encode, text, ans_table)
@@ -85,6 +88,7 @@ if __name__ == '__main__':
         ans_cpu_usage = measure_cpu_usage(tans_encode, text, ans_table)
         ans_compressed_size = len(encoded_ans)  # Rozmiar w bajtach (dlugosc listy)
         ans_ratio = compression_ratio(original_size, ans_compressed_size)
+        print(f"Decoded ANS: {tans_decode(encoded_ans, encoded_ans_state, ans_table)}")
 
         # Zapisz wyniki ANS
         results["ANS Time"] = f"{ans_time:.5f} seconds"

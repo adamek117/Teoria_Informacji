@@ -23,7 +23,10 @@ def huffman_encode(data):
     huffman_tree = build_huffman_tree(frequencies)
     huffman_dict = {char: code for char, code in huffman_tree}
     encoded_data = ''.join(huffman_dict[char] for char in data)
-    return encoded_data, huffman_dict
+
+    total_symbols = sum(frequencies.values())
+    average_code_length = sum(len(code) * frequencies[char] for char, code in huffman_dict.items()) / total_symbols
+    return encoded_data, huffman_dict, average_code_length
 
 def huffman_decode(encoded_data, huffman_dict):
     reverse_dict = {code: char for char, code in huffman_dict.items()}

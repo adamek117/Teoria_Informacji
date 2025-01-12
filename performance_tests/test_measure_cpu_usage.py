@@ -1,8 +1,9 @@
 import psutil
 
 def measure_cpu_usage(algorithm, text, *args, iterations=1000):
-
-    #Tutaj można po prostu wykonać bez iteracji, żeby ocenić pojedyncze działanie algorytmu
+    """
+    Funkcja obliczająca wykorzystanie CPU
+    """
     process = psutil.Process()
     start_cpu = process.cpu_percent(interval=None)
     for _ in range(iterations):

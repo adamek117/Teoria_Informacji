@@ -3,7 +3,11 @@ import math
 
 
 def calculate_entropy(text):
-    # Zliczanie częstotliwości występowania znaków
+    """
+    Obliczanie entropii tekstu
+    :param text: Wejściowy tekst
+    :return: Entropia tekstu
+    """
     freq = Counter(text)
     total = len(text)  # Długość tekstu
     

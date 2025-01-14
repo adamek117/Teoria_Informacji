@@ -29,18 +29,20 @@ def save_results_to_file(filename, results):
 
 if __name__ == '__main__':
     """Dane wejściowe"""
-    # Pełne teksty Kubusia Puchatka w różnych językach
+    # Pełne teksty Małego Księcia w różnych językach
     texts_full = {
-        "English - Full Text": read_text_from_file('data/full/English.txt'),
-        "Polish - Full Text": read_text_from_file('data/full/Polish.txt')
+        "English - Full Text": read_text_from_file('data/full/MalyKsiaze/English.txt'),
+        "French - Full Text": read_text_from_file('data/full/MalyKsiaze/French.txt'),
+        "Hungary - Full Text": read_text_from_file('data/full/MalyKsiaze/Hungary.txt'),
+        "Polish - Full Text": read_text_from_file('data/full/MalyKsiaze/Polish.txt')
     }
 
-    # Pierwszy rozdział Kubusia Puchatka w różnych językach
+    # Pierwszy oraz Drugi rozdział Małego Księcia w różnych językach
     texts_short = {
-        "English": read_text_from_file('data/short/English.txt'),
-        "French": read_text_from_file('data/short/French.txt'),
-        "Hungary": read_text_from_file('data/short/Hungary.txt'),
-        "Polish": read_text_from_file('data/short/Polish.txt')
+        "English": read_text_from_file('data/short/MalyKsiaze/English.txt'),
+        "French": read_text_from_file('data/short/MalyKsiaze/French.txt'),
+        "Hungary": read_text_from_file('data/short/MalyKsiaze/Hungary.txt'),
+        "Polish": read_text_from_file('data/short/MalyKsiaze/Polish.txt')
     }
 
     """Zmienne pomocnicze"""
@@ -49,7 +51,7 @@ if __name__ == '__main__':
     iterations_cpu = 1  # Liczba iteracji testu obciążenia CPU
 
     """Właściwa część programu"""
-    for language, text in texts_short.items():
+    for language, text in texts_full.items():
         print(f"Processing {language} text")
 
         results = {"Language": language}

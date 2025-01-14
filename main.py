@@ -1,9 +1,12 @@
 import os
 import struct
 
-from ans import tans_encode, tans_decode, build_tans_table
-from arythmetic_code import arithmetic_encode, arithmetic_decode
-from huffman_code import huffman_encode, huffman_decode
+from matplotlib import pyplot as plt
+
+from encodes.ans import tans_encode, tans_decode, build_tans_table
+from encodes.arythmetic_code import arithmetic_encode, arithmetic_decode
+from encodes.huffman_code import huffman_encode, huffman_decode
+from plots.entropy_plot import entropy_plot_func
 from read_file import read_text_from_file
 from performance_tests.test_compression import compression_ratio
 from performance_tests.test_entropy import calculate_entropy

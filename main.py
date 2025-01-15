@@ -52,6 +52,7 @@ if __name__ == '__main__':
     print_debug = False  # Włączenie wyświetlania kodowanej i odzyskanej wiadomości
     iterations_stability = 1  # Liczba iteracji testu stabilności
     iterations_cpu = 1  # Liczba iteracji testu obciążenia CPU
+
     """Właściwa część programu"""
     for language, text in texts_full.items():
         print(f"Processing {language} text")
@@ -216,19 +217,9 @@ if __name__ == '__main__':
         results["ANS Memory Usage"] = f"{ans_memory:.5f} MiB"
         results["ANS CPU Usage"] = f"{ans_cpu_usage} %"
         
-        if language.find("English - Full Text"):
-            entropys_english =[huffman_entropy, arithmetic_entropy,ans_entropy]
-        if language.find("French"):
-            entropys_french=[huffman_entropy, arithmetic_entropy,ans_entropy]
-        if language.find("Polish"):
-            entropys_polish=[huffman_entropy, arithmetic_entropy,ans_entropy]
-        if language.find("Hungary"):
-            entropys_hungarian=[huffman_entropy, arithmetic_entropy,ans_entropy]
         # Zapisz wyniki do pliku
         filename = f"results_{language.lower()}.txt"
         save_results_to_file(filename, results)
         print(f"Results for {language} saved to {filename}\n")
         print(23 * "=", "DONE", 23 * "=")
-
-    entropy_plot_func(entropys_polish[0],entropys_polish[1],entropys_french[2],entropys_hungarian[3])
 

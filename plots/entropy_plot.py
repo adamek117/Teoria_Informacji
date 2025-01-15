@@ -3,7 +3,6 @@ import matplotlib.pyplot as plt
 import numpy as np
 matplotlib.use('TkAgg')
 
-
 def entropy_plot_func(polish_value, english_value, french_value,hungarian_value ):
 
     # Dane przykładowe: entropia dla 4 języków
@@ -16,7 +15,7 @@ def entropy_plot_func(polish_value, english_value, french_value,hungarian_value 
     
     # Opisy osi i tytuł
     plt.xlabel("Language", fontsize=16)
-    plt.ylabel("Entropy value",  fontsize=16)
+    plt.ylabel("Huffman entropy value",  fontsize=16)
     plt.title("Entropy in every language", fontsize=16)
     
     # Wyświetlenie wykresu

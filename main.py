@@ -3,7 +3,7 @@ import struct
 import pandas as pd
 
 from encodes.ans import tans_encode, tans_decode, build_tans_table
-from encodes.arythmetic_code import arithmetic_encode, arithmetic_decode
+from encodes.arythmetic_code import arithmetic_encode_large, arithmetic_decode_large
 from encodes.huffman_code import huffman_encode, huffman_decode
 from read_file import read_text_from_file
 from performance_tests.test_compression import compression_ratio
@@ -52,6 +52,7 @@ if __name__ == '__main__':
     iterations_cpu = 1  # Liczba iteracji testu obciążenia CPU
     entropy_values = {} # Wartości entropii
     text_sizes = {} # Długość tekst
+    segment_length = 1500  # Długość segmentu dla kodowania arytmetycznego
 
     """Przygotowanie Dataframe"""
     data = {
@@ -167,16 +168,16 @@ if __name__ == '__main__':
         # Testowanie kodowanie arytmetyczne
         print(50 * "-")
         print("Arithmetic")
-        arithmetic_compressed, arithmetic_prob = arithmetic_encode(text)
+        arithmetic_encoded_segments, arithmetic_probabilities = arithmetic_encode_large(text, segment_length)
 
         # Czas wykonania
-        arithmetic_time = test_execution_time_func(arithmetic_encode, text)
+        arithmetic_time = test_execution_time_func(arithmetic_encode_large, text, segment_length)
         # Wielkość skompresowana w bajtach
-        compressed_binary = struct.pack('d', arithmetic_compressed)
-        arithmetic_compressed_size = len(compressed_binary)
+        compressed_binary_segments = [struct.pack('d', segment) for segment in arithmetic_encoded_segments]
+        arithmetic_compressed_size = sum(len(segment) for segment in compressed_binary_segments)
 
         # Entropia kodu
-        arithmetic_entropy = calculate_entropy(str(arithmetic_compressed))
+        arithmetic_entropy = calculate_entropy("".join(map(str, arithmetic_encoded_segments)))
         # Średnia długość kodu — dla kodowania arytmetycznego średnia długość kodu jest równoważna entropii
         arithmetic_avg_code_len = arithmetic_entropy
         # Współczynnik kompresji
@@ -189,15 +190,23 @@ if __name__ == '__main__':
         arithmetic_redundancy = arithmetic_avg_code_len - arithmetic_entropy
 
         # Stabilność
-        arithmetic_stability = stability_test(arithmetic_encode, text, iterations=iterations_stability)
+        arithmetic_stability = stability_test(arithmetic_encode_large, text, segment_length,
+                                              iterations=iterations_stability)
         # Pamięć
-        arithmetic_memory = test_memory_usage_func(arithmetic_encode, text)
+        arithmetic_memory = test_memory_usage_func(arithmetic_encode_large, text, segment_length)
         # Obciążenie CPU
-        arithmetic_cpu_usage = measure_cpu_usage(arithmetic_encode, text, iterations=iterations_cpu)
+        arithmetic_cpu_usage = measure_cpu_usage(arithmetic_encode_large, text, segment_length,
+                                                 iterations=iterations_cpu)
+
+        # Zapisanie zdekodowanego tekstu do pliku
+        decoded_text = arithmetic_decode_large(arithmetic_encoded_segments, segment_length, arithmetic_probabilities)
+        if language == "English":
+            with open(f"results/decoded_{language}.txt", "w") as file:
+                file.write(decoded_text)
 
         # Debugowanie
         if print_debug:
-            print(f"Decoded Arithmetic: {arithmetic_decode(arithmetic_compressed, len(text), arithmetic_prob)}")
+            print(f"Decoded Arithmetic: {decoded_text}")
 
         # Zapisz wyniki Arithmetic
         results["Arithmetic Time"] = f"{arithmetic_time:.5f} seconds"
@@ -262,7 +271,7 @@ if __name__ == '__main__':
         ans_redundancy = ans_avg_code_len - ans_entropy
 
         # Stabilność
-        ans_stability = stability_test(lambda t: tans_encode(t, ans_table), text, 100)
+        ans_stability = stability_test(lambda t: tans_encode(t, ans_table), text, iterations=100)
         # Pamięć
         ans_memory = test_memory_usage_func(tans_encode, text, ans_table)
         # Obciążenie CPU

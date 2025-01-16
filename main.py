@@ -1,12 +1,10 @@
 import os
 import struct
-
-from matplotlib import pyplot as plt
+import pandas as pd
 
 from encodes.ans import tans_encode, tans_decode, build_tans_table
 from encodes.arythmetic_code import arithmetic_encode, arithmetic_decode
 from encodes.huffman_code import huffman_encode, huffman_decode
-from plots.entropy_plot import entropy_plot_func
 from read_file import read_text_from_file
 from performance_tests.test_compression import compression_ratio
 from performance_tests.test_entropy import calculate_entropy
@@ -52,12 +50,42 @@ if __name__ == '__main__':
     print_debug = False  # Włączenie wyświetlania kodowanej i odzyskanej wiadomości
     iterations_stability = 1  # Liczba iteracji testu stabilności
     iterations_cpu = 1  # Liczba iteracji testu obciążenia CPU
-    entropy_values ={} # Wartości entropii
-    text_sizes ={} # Długość tekstu
+    entropy_values = {} # Wartości entropii
+    text_sizes = {} # Długość tekst
+
+    """Przygotowanie Dataframe"""
+    data = {
+        "Language": [],
+        "Input Entropy [bits/symbol]": [],
+        "Input Size [bytes]": [],
+        "Algorithm": [],
+        "Time [s]": [],
+        "Compressed Size [bytes]": [],
+        "Entropy [bits/symbol]": [],
+        "Average Code Length [bits/symbol]": [],
+        "Ratio": [],
+        "Information Gain [bytes]": [],
+        "Efficiency": [],
+        "Redundancy [bits/symbol]": [],
+        "Stability Mean [s]": [],
+        "Stability Min [s]": [],
+        "Stability Max [s]": [],
+        "Memory Usage [MiB]": [],
+        "CPU Usage [%]": []
+    }
+
+    # Docelowy Dataframe
+    df = pd.DataFrame(data)
+    # Zmienna pomocnicza do zapisywania aktualnych wyników
+    row = {}
+
     """Właściwa część programu"""
     for language, text in texts_full.items():
+        language = language.split(" ")[0]
+
         print(f"Processing {language} text")
 
+        # Oryginalny język tekstu
         results = {"Language": language}
         # Oryginalny rozmiar w bajtach
         original_size = len(text.encode('utf-8'))
@@ -113,6 +141,27 @@ if __name__ == '__main__':
         results["Huffman Memory Usage"] = f"{huffman_memory:.5f} MiB"
         results["Huffman CPU Usage"] = f"{huffman_cpu_usage} %"
 
+        # Zapis danych do Dataframe
+        df.loc[len(df)] = [
+            language,
+            entropy,
+            original_size,
+            "Huffman",
+            huffman_time,
+            huffman_compressed_size,
+            huffman_entropy,
+            huffman_avg_code_len,
+            huffman_ratio,
+            huffman_information_gain,
+            huffman_efficiency,
+            huffman_redundancy,
+            huffman_stability[0],
+            huffman_stability[1],
+            huffman_stability[2],
+            huffman_memory,
+            huffman_cpu_usage
+        ]
+
         print(f"{huffman_time:.5f} seconds")
 
         # Testowanie kodowanie arytmetyczne
@@ -166,6 +215,27 @@ if __name__ == '__main__':
         results["Arithmetic CPU Usage"] = f"{arithmetic_cpu_usage} %"
         print(f"{arithmetic_time:.5f} seconds")
 
+        # Zapis danych do Dataframe
+        df.loc[len(df)] = [
+            language,
+            entropy,
+            original_size,
+            "Arithmetic",
+            arithmetic_time,
+            arithmetic_compressed_size,
+            arithmetic_entropy,
+            arithmetic_avg_code_len,
+            arithmetic_ratio,
+            arithmetic_information_gain,
+            arithmetic_efficiency,
+            arithmetic_redundancy,
+            arithmetic_stability[0],
+            arithmetic_stability[1],
+            arithmetic_stability[2],
+            arithmetic_memory,
+            arithmetic_cpu_usage
+        ]
+
         # Testowanie ANS
         print(50 * "-")
         print("ANS")
@@ -218,10 +288,32 @@ if __name__ == '__main__':
         results["ANS Memory Usage"] = f"{ans_memory:.5f} MiB"
         results["ANS CPU Usage"] = f"{ans_cpu_usage} %"
 
+        # Zapis danych do Dataframe
+        df.loc[len(df)] = [
+            language,
+            entropy,
+            original_size,
+            "ANS",
+            ans_time,
+            ans_compressed_size,
+            ans_entropy,
+            ans_avg_code_len,
+            ans_ratio,
+            ans_information_gain,
+            ans_efficiency,
+            ans_redundancy,
+            ans_stability[0],
+            ans_stability[1],
+            ans_stability[2],
+            ans_memory,
+            ans_cpu_usage
+        ]
+
         # Zapisz wyniki do pliku
         filename = f"results_{language.lower()}.txt"
         save_results_to_file(filename, results)
         print(f"Results for {language} saved to {filename}\n")
         print(23 * "=", "DONE", 23 * "=")
 
-
+    # Zapisz wyniki do pliku CSV
+    df.to_csv("results/results.csv", index=False)

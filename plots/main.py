@@ -17,6 +17,7 @@ def generate_compression_plot(df):
     plt.legend(title='Algorytm')
     plt.tight_layout()
     plt.show()
+    plt.savefig('compression_plot.png')
 
 
 def generate_worktime_plot(df):
@@ -33,6 +34,7 @@ def generate_worktime_plot(df):
     plt.legend(title='Język')
     plt.tight_layout()
     plt.show()
+    plt.savefig('worktime_plot.png')
 
 
 def generate_informationgained_plot(df):
@@ -49,6 +51,7 @@ def generate_informationgained_plot(df):
     plt.legend(title='Algorytm')
     plt.tight_layout()
     plt.show()
+    plt.savefig('informationgained_plot.png')
 
 
 def generate_stability_boxplot(df):
@@ -65,6 +68,7 @@ def generate_stability_boxplot(df):
     plt.xlabel('Algorytm')
     plt.tight_layout()
     plt.show()
+    plt.savefig('stability_boxplot(.png')
 
 
 

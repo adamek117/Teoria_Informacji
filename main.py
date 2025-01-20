@@ -158,6 +158,10 @@ if __name__ == '__main__':
                 huffman_cpu_usage
             ]
 
+            if run % 5 == 0:
+                # Zapisz wyniki do pliku CSV
+                df.to_csv("results/results_multi.csv", index=False)
+
             # Zapisz wyniki Huffman
             if save_to_txt:
                 results["Huffman Time"] = f"{huffman_time:.5f} seconds"
@@ -177,6 +181,9 @@ if __name__ == '__main__':
 
                 # Save results to file for each run
                 save_results_to_file(f"results_{language.lower()}.txt", results)
+
+        # Zapisz wyniki do pliku CSV
+        df.to_csv("results/results_multi.csv", index=False)
 
         # Testowanie kodowanie arytmetyczne
         print(50 * "-")
@@ -240,6 +247,10 @@ if __name__ == '__main__':
                 arithmetic_cpu_usage
             ]
 
+            if run % 5 == 0:
+                # Zapisz wyniki do pliku CSV
+                df.to_csv("results/results_multi.csv", index=False)
+
             if save_to_txt:
                 # Zapisanie zdekodowanego tekstu do pliku
                 decoded_text = arithmetic_decode_large(arithmetic_encoded_segments, segment_length,
@@ -270,6 +281,9 @@ if __name__ == '__main__':
 
                 # Save results to file for each run
                 save_results_to_file(f"results_{language.lower()}.txt", results)
+
+        # Zapisz wyniki do pliku CSV
+        df.to_csv("results/results_multi.csv", index=False)
 
         # Testowanie ANS
         print(50 * "-")
@@ -331,6 +345,10 @@ if __name__ == '__main__':
                 ans_cpu_usage
             ]
 
+            if run % 5 == 0:
+                # Zapisz wyniki do pliku CSV
+                df.to_csv("results/results_multi.csv", index=False)
+
             if save_to_txt:
                 # Debugowanie
                 if print_debug:
@@ -356,5 +374,5 @@ if __name__ == '__main__':
                 # Save results to file for each run
                 save_results_to_file(f"results_{language.lower()}.txt", results)
 
-    # Zapisz wyniki do pliku CSV
-    df.to_csv("results/results.csv", index=False)
+        # Zapisz wyniki do pliku CSV
+        df.to_csv("results/results_multi.csv", index=False)

@@ -1,1 +1,7 @@
 zstandard~=0.23.0 
+pandas~=2.2.3
+matplotlib~=3.10.0
+seaborn~=0.13.2
+numpy~=2.2.1
+memory-profiler~=0.61.0
+psutil~=6.1.1

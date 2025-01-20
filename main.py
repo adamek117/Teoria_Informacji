@@ -1,5 +1,7 @@
 import os
 import struct
+import time
+
 import pandas as pd
 
 from encodes.ans import tans_encode, tans_decode, build_tans_table
@@ -34,8 +36,8 @@ if __name__ == '__main__':
     texts_full = {
         "English - Full Text": read_text_from_file('data/full/MalyKsiaze/English.txt'),
         "French - Full Text": read_text_from_file('data/full/MalyKsiaze/French.txt'),
-        "Hungary - Full Text": read_text_from_file('data/full/MalyKsiaze/Hungary.txt'),
-        "Polish - Full Text": read_text_from_file('data/full/MalyKsiaze/Polish.txt')
+        # "Hungary - Full Text": read_text_from_file('data/full/MalyKsiaze/Hungary.txt'),
+        # "Polish - Full Text": read_text_from_file('data/full/MalyKsiaze/Polish.txt')
     }
 
     # Pierwszy oraz Drugi rozdział Małego Księcia w różnych językach
@@ -50,8 +52,8 @@ if __name__ == '__main__':
     print_debug = False  # Włączenie wyświetlania kodowanej i odzyskanej wiadomości
     save_to_txt = False  # Zapis wyników do pliku TXT
     num_runs = 2  # Liczba iteracji testu
-    iterations_stability = 1  # Liczba iteracji testu stabilności
-    iterations_cpu = 1  # Liczba iteracji testu obciążenia CPU
+    iterations_stability = 10  # Liczba iteracji testu stabilności
+    iterations_cpu = 10  # Liczba iteracji testu obciążenia CPU
     entropy_values = {} # Wartości entropii
     text_sizes = {} # Długość tekstu
     segment_length = 1500  # Długość segmentu dla kodowania arytmetycznego
@@ -59,10 +61,11 @@ if __name__ == '__main__':
     """Przygotowanie Dataframe"""
     data = {
         "Language": [],
+        "Algorithm": [],
         "Input Entropy [bits/symbol]": [],
         "Input Size [bytes]": [],
-        "Algorithm": [],
-        "Time [s]": [],
+        "Encode time [s]": [],
+        "Decode time [s]": [],
         "Compressed Size [bytes]": [],
         "Entropy [bits/symbol]": [],
         "Average Code Length [bits/symbol]": [],
@@ -107,10 +110,12 @@ if __name__ == '__main__':
             print(f"Run {run + 1}/{num_runs}")
 
             # Testowanie kodowanie Huffmana
+            start_time = time.time()
             huffman_compressed, huffman_codebook, huffman_avg_code_len = huffman_encode(text)
 
             # Czas wykonania
-            huffman_time = test_execution_time_func(huffman_encode, text)
+            huffman_time = time.time() - start_time
+
             # Wielkość skompresowana w bajtach
             huffman_compressed_size = len(huffman_compressed) / 8
 
@@ -131,6 +136,11 @@ if __name__ == '__main__':
             huffman_memory = test_memory_usage_func(huffman_encode, text)
             # Obciążenie CPU
             huffman_cpu_usage = measure_cpu_usage(huffman_encode, text, iterations=iterations_cpu)
+
+            # Czas dekodowania
+            start_time = time.time()
+            huffman_decode(huffman_compressed, huffman_codebook)
+            huffman_decode_time = time.time() - start_time
             
             if print_debug:
                 print(f"Decoded Huffman: {huffman_decode(huffman_compressed, huffman_codebook)}")
@@ -140,10 +150,11 @@ if __name__ == '__main__':
             # Zapis danych do Dataframe
             df.loc[len(df)] = [
                 language,
+                "Huffman",
                 entropy,
                 original_size,
-                "Huffman",
                 huffman_time,
+                huffman_decode_time,
                 huffman_compressed_size,
                 huffman_entropy,
                 huffman_avg_code_len,
@@ -194,10 +205,11 @@ if __name__ == '__main__':
             print(f"Run {run + 1}/{num_runs}")
 
             # Testowanie kodowanie arytmetycznego
+            start_time = time.time()
             arithmetic_encoded_segments, arithmetic_probabilities = arithmetic_encode_large(text, segment_length)
 
             # Czas wykonania
-            arithmetic_time = test_execution_time_func(arithmetic_encode_large, text, segment_length)
+            arithmetic_time = time.time() - start_time
             # Wielkość skompresowana w bajtach
             compressed_binary_segments = [struct.pack('d', segment) for segment in arithmetic_encoded_segments]
             arithmetic_compressed_size = sum(len(segment) for segment in compressed_binary_segments)
@@ -223,16 +235,22 @@ if __name__ == '__main__':
             # Obciążenie CPU
             arithmetic_cpu_usage = measure_cpu_usage(arithmetic_encode_large, text, segment_length,
                                                     iterations=iterations_cpu)
+
+            # Czas dekodowania
+            start_time = time.time()
+            arithmetic_decode_large(arithmetic_encoded_segments, segment_length, arithmetic_probabilities)
+            arithmetic_decode_time = time.time() - start_time
             
             print(f"{arithmetic_time:.5f} seconds")
 
             # Zapis danych do Dataframe
             df.loc[len(df)] = [
                 language,
+                "Arithmetic",
                 entropy,
                 original_size,
-                "Arithmetic",
                 arithmetic_time,
+                arithmetic_decode_time,
                 arithmetic_compressed_size,
                 arithmetic_entropy,
                 arithmetic_avg_code_len,
@@ -293,11 +311,12 @@ if __name__ == '__main__':
         for run in range(num_runs):
             print(f"Run {run + 1}/{num_runs}")
 
+            start_time = time.time()
             ans_table = build_tans_table(text)
             encoded_ans_state, encoded_ans = tans_encode(text, ans_table)
 
             # Czas wykonania
-            ans_time = test_execution_time_func(tans_encode, text, ans_table)
+            ans_time = time.time() - start_time
             # Wielkość skompresowana w bajtach
             ans_compressed_size = len(encoded_ans)
 
@@ -322,15 +341,21 @@ if __name__ == '__main__':
             # Obciążenie CPU
             ans_cpu_usage = measure_cpu_usage(tans_encode, text, ans_table, iterations=iterations_cpu)
 
+            # Czas dekodowania
+            start_time = time.time()
+            decoded_ans = tans_decode(encoded_ans, encoded_ans_state, ans_table)
+            ans_decode_time = time.time() - start_time
+
             print(f"{ans_time:.5f} seconds")
 
             # Zapis danych do Dataframe
             df.loc[len(df)] = [
                 language,
+                "ANS",
                 entropy,
                 original_size,
-                "ANS",
                 ans_time,
+                ans_compressed_size,
                 ans_compressed_size,
                 ans_entropy,
                 ans_avg_code_len,

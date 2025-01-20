@@ -2,3 +2,4 @@
 !.gitignore
 !results.csv
 !results_multi.csv
+!grouped_results.csv

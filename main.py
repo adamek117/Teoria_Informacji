@@ -13,7 +13,6 @@ from performance_tests.test_entropy import calculate_entropy
 from performance_tests.test_measure_cpu_usage import measure_cpu_usage
 from performance_tests.test_memory_usage import test_memory_usage_func
 from performance_tests.test_stability import stability_test
-from performance_tests.text_execution_time import test_execution_time_func
 
 
 def ensure_results_dir():
@@ -34,10 +33,10 @@ if __name__ == '__main__':
     """Dane wejściowe"""
     # Pełne teksty Małego Księcia w różnych językach
     texts_full = {
-        "English - Full Text": read_text_from_file('data/full/MalyKsiaze/English.txt'),
+        # "English - Full Text": read_text_from_file('data/full/MalyKsiaze/English.txt'),
         "French - Full Text": read_text_from_file('data/full/MalyKsiaze/French.txt'),
-        # "Hungary - Full Text": read_text_from_file('data/full/MalyKsiaze/Hungary.txt'),
-        # "Polish - Full Text": read_text_from_file('data/full/MalyKsiaze/Polish.txt')
+        "Hungary - Full Text": read_text_from_file('data/full/MalyKsiaze/Hungary.txt'),
+        "Polish - Full Text": read_text_from_file('data/full/MalyKsiaze/Polish.txt')
     }
 
     # Pierwszy oraz Drugi rozdział Małego Księcia w różnych językach
@@ -51,9 +50,9 @@ if __name__ == '__main__':
     """Zmienne pomocnicze"""
     print_debug = False  # Włączenie wyświetlania kodowanej i odzyskanej wiadomości
     save_to_txt = False  # Zapis wyników do pliku TXT
-    num_runs = 2  # Liczba iteracji testu
-    iterations_stability = 10  # Liczba iteracji testu stabilności
-    iterations_cpu = 10  # Liczba iteracji testu obciążenia CPU
+    num_runs = 100  # Liczba iteracji testu
+    iterations_stability = 1  # Liczba iteracji testu stabilności
+    iterations_cpu = 1  # Liczba iteracji testu obciążenia CPU
     entropy_values = {} # Wartości entropii
     text_sizes = {} # Długość tekstu
     segment_length = 1500  # Długość segmentu dla kodowania arytmetycznego
@@ -84,6 +83,11 @@ if __name__ == '__main__':
     df = pd.DataFrame(data)
     # Zmienna pomocnicza do zapisywania aktualnych wyników
     row = {}
+    
+    # OPCJONALNE: Odczytywanie danych z pliku CSV
+    if os.path.exists("results/results_multi.csv"):
+        df_existing = pd.read_csv("results/results_multi.csv")
+        df = pd.concat([df_existing, df], ignore_index=True)
 
     """Właściwa część programu"""
     for language, text in texts_full.items():
@@ -105,7 +109,7 @@ if __name__ == '__main__':
         print(50 * "-")
         print("Huffman")
 
-        # Run the tests multiple times
+        # # Run the tests multiple times
         for run in range(num_runs):
             print(f"Run {run + 1}/{num_runs}")
 
@@ -141,10 +145,10 @@ if __name__ == '__main__':
             start_time = time.time()
             huffman_decode(huffman_compressed, huffman_codebook)
             huffman_decode_time = time.time() - start_time
-            
+
             if print_debug:
                 print(f"Decoded Huffman: {huffman_decode(huffman_compressed, huffman_codebook)}")
-            
+
             print(f"{huffman_time:.5f} seconds")
 
             # Zapis danych do Dataframe
@@ -240,7 +244,7 @@ if __name__ == '__main__':
             start_time = time.time()
             arithmetic_decode_large(arithmetic_encoded_segments, segment_length, arithmetic_probabilities)
             arithmetic_decode_time = time.time() - start_time
-            
+
             print(f"{arithmetic_time:.5f} seconds")
 
             # Zapis danych do Dataframe
@@ -355,7 +359,7 @@ if __name__ == '__main__':
                 entropy,
                 original_size,
                 ans_time,
-                ans_compressed_size,
+                ans_decode_time,
                 ans_compressed_size,
                 ans_entropy,
                 ans_avg_code_len,

@@ -1,3 +1,4 @@
 *
 !.gitignore
-!results_16_25.csv
+!results.csv
+!results_multi.csv

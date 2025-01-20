@@ -48,7 +48,8 @@ if __name__ == '__main__':
 
     """Zmienne pomocnicze"""
     print_debug = False  # Włączenie wyświetlania kodowanej i odzyskanej wiadomości
-    num_runs = 1  # Liczba iteracji testu
+    save_to_txt = False  # Zapis wyników do pliku TXT
+    num_runs = 2  # Liczba iteracji testu
     iterations_stability = 1  # Liczba iteracji testu stabilności
     iterations_cpu = 1  # Liczba iteracji testu obciążenia CPU
     entropy_values = {} # Wartości entropii
@@ -97,13 +98,15 @@ if __name__ == '__main__':
         results["Entropy"] = f"{entropy:.5f} bits per symbol"
         results["Original Size"] = f"{original_size:.5f} bytes"
 
+        # Testowanie Huffman
+        print(50 * "-")
+        print("Huffman")
+
         # Run the tests multiple times
         for run in range(num_runs):
             print(f"Run {run + 1}/{num_runs}")
 
-            # Testowanie Huffman
-            print(50 * "-")
-            print("Huffman")
+            # Testowanie kodowanie Huffmana
             huffman_compressed, huffman_codebook, huffman_avg_code_len = huffman_encode(text)
 
             # Czas wykonania
@@ -131,21 +134,6 @@ if __name__ == '__main__':
             
             if print_debug:
                 print(f"Decoded Huffman: {huffman_decode(huffman_compressed, huffman_codebook)}")
-
-            # Zapisz wyniki Huffman
-            results["Huffman Time"] = f"{huffman_time:.5f} seconds"
-            results["Huffman Compressed Size"] = f"{huffman_compressed_size:.5f} bytes"
-
-            results["Huffman Entropy"] = f"{huffman_entropy:.5f} bits per symbol"
-            results["Huffman Average Code Length"] = f"{huffman_avg_code_len:.5f} bits per symbol"
-            results["Huffman Ratio"] = f"{huffman_ratio:.5f}"
-            results["Huffman Information Gain"] = f"{huffman_information_gain} bytes"
-            results["Huffman Efficiency"] = f"{huffman_efficiency:.5f}"
-            results["Huffman Redundancy"] = f"{huffman_redundancy:.5f} bits per symbol"
-
-            results["Huffman Stability"] = f"mean={huffman_stability[0]:.5f}, min={huffman_stability[1]:.5f}, max={huffman_stability[2]:.5f} seconds"
-            results["Huffman Memory Usage"] = f"{huffman_memory:.5f} MiB"
-            results["Huffman CPU Usage"] = f"{huffman_cpu_usage} %"
             
             print(f"{huffman_time:.5f} seconds")
 
@@ -169,17 +157,36 @@ if __name__ == '__main__':
                 huffman_memory,
                 huffman_cpu_usage
             ]
-            # Save results to file for each run
-            save_results_to_file(f"results_{language.lower()}.txt", results)
-    
-    
+
+            # Zapisz wyniki Huffman
+            if save_to_txt:
+                results["Huffman Time"] = f"{huffman_time:.5f} seconds"
+                results["Huffman Compressed Size"] = f"{huffman_compressed_size:.5f} bytes"
+
+                results["Huffman Entropy"] = f"{huffman_entropy:.5f} bits per symbol"
+                results["Huffman Average Code Length"] = f"{huffman_avg_code_len:.5f} bits per symbol"
+                results["Huffman Ratio"] = f"{huffman_ratio:.5f}"
+                results["Huffman Information Gain"] = f"{huffman_information_gain} bytes"
+                results["Huffman Efficiency"] = f"{huffman_efficiency:.5f}"
+                results["Huffman Redundancy"] = f"{huffman_redundancy:.5f} bits per symbol"
+
+                results[
+                    "Huffman Stability"] = f"mean={huffman_stability[0]:.5f}, min={huffman_stability[1]:.5f}, max={huffman_stability[2]:.5f} seconds"
+                results["Huffman Memory Usage"] = f"{huffman_memory:.5f} MiB"
+                results["Huffman CPU Usage"] = f"{huffman_cpu_usage} %"
+
+                # Save results to file for each run
+                save_results_to_file(f"results_{language.lower()}.txt", results)
+
+        # Testowanie kodowanie arytmetyczne
+        print(50 * "-")
+        print("Arithmetic")
+
         # Run the tests multiple times
         for run in range(num_runs):
             print(f"Run {run + 1}/{num_runs}")
 
-            # Testowanie kodowanie arytmetyczne
-            print(50 * "-")
-            print("Arithmetic")
+            # Testowanie kodowanie arytmetycznego
             arithmetic_encoded_segments, arithmetic_probabilities = arithmetic_encode_large(text, segment_length)
 
             # Czas wykonania
@@ -209,31 +216,6 @@ if __name__ == '__main__':
             # Obciążenie CPU
             arithmetic_cpu_usage = measure_cpu_usage(arithmetic_encode_large, text, segment_length,
                                                     iterations=iterations_cpu)
-
-            # Zapisanie zdekodowanego tekstu do pliku
-            decoded_text = arithmetic_decode_large(arithmetic_encoded_segments, segment_length, arithmetic_probabilities)
-            if language == "English":
-                with open(f"results/decoded_{language}.txt", "w") as file:
-                    file.write(decoded_text)
-
-            # Debugowanie
-            if print_debug:
-                print(f"Decoded Arithmetic: {decoded_text}")
-
-            # Zapisz wyniki Arithmetic
-            results["Arithmetic Time"] = f"{arithmetic_time:.5f} seconds"
-            results["Arithmetic Compressed Size"] = f"{arithmetic_compressed_size:.5f} bytes"
-
-            results["Arithmetic Entropy"] = f"{arithmetic_entropy:.5f} bits per symbol"
-            results["Arithmetic Average Code Length"] = f"{arithmetic_avg_code_len:.5f} bits per symbol"
-            results["Arithmetic Ratio"] = f"{arithmetic_ratio:.5f}"
-            results["Arithmetic Information Gain"] = f"{arithmetic_information_gain} bytes"
-            results["Arithmetic Efficiency"] = f"{arithmetic_efficiency:.5f}"
-            results["Arithmetic Redundancy"] = f"{arithmetic_redundancy:.5f} bits per symbol"
-
-            results["Arithmetic Stability"] = f"mean={arithmetic_stability[0]:.5f}, min={arithmetic_stability[1]:.5f}, max={arithmetic_stability[2]:.5f} seconds"
-            results["Arithmetic Memory Usage"] = f"{arithmetic_memory:.5f} MiB"
-            results["Arithmetic CPU Usage"] = f"{arithmetic_cpu_usage} %"
             
             print(f"{arithmetic_time:.5f} seconds")
 
@@ -257,17 +239,46 @@ if __name__ == '__main__':
                 arithmetic_memory,
                 arithmetic_cpu_usage
             ]
-            # Save results to file for each run
-            save_results_to_file(f"results_{language.lower()}.txt", results)
 
+            if save_to_txt:
+                # Zapisanie zdekodowanego tekstu do pliku
+                decoded_text = arithmetic_decode_large(arithmetic_encoded_segments, segment_length,
+                                                       arithmetic_probabilities)
+                if language == "English":
+                    with open(f"results/decoded_{language}.txt", "w") as file:
+                        file.write(decoded_text)
+
+                # Debugowanie
+                if print_debug:
+                    print(f"Decoded Arithmetic: {decoded_text}")
+
+                # Zapisz wyniki Arithmetic
+                results["Arithmetic Time"] = f"{arithmetic_time:.5f} seconds"
+                results["Arithmetic Compressed Size"] = f"{arithmetic_compressed_size:.5f} bytes"
+
+                results["Arithmetic Entropy"] = f"{arithmetic_entropy:.5f} bits per symbol"
+                results["Arithmetic Average Code Length"] = f"{arithmetic_avg_code_len:.5f} bits per symbol"
+                results["Arithmetic Ratio"] = f"{arithmetic_ratio:.5f}"
+                results["Arithmetic Information Gain"] = f"{arithmetic_information_gain} bytes"
+                results["Arithmetic Efficiency"] = f"{arithmetic_efficiency:.5f}"
+                results["Arithmetic Redundancy"] = f"{arithmetic_redundancy:.5f} bits per symbol"
+
+                results[
+                    "Arithmetic Stability"] = f"mean={arithmetic_stability[0]:.5f}, min={arithmetic_stability[1]:.5f}, max={arithmetic_stability[2]:.5f} seconds"
+                results["Arithmetic Memory Usage"] = f"{arithmetic_memory:.5f} MiB"
+                results["Arithmetic CPU Usage"] = f"{arithmetic_cpu_usage} %"
+
+                # Save results to file for each run
+                save_results_to_file(f"results_{language.lower()}.txt", results)
+
+        # Testowanie ANS
+        print(50 * "-")
+        print("ANS")
 
         # Run the tests multiple times
         for run in range(num_runs):
             print(f"Run {run + 1}/{num_runs}")
 
-            # Testowanie ANS
-            print(50 * "-")
-            print("ANS")
             ans_table = build_tans_table(text)
             encoded_ans_state, encoded_ans = tans_encode(text, ans_table)
 
@@ -297,26 +308,6 @@ if __name__ == '__main__':
             # Obciążenie CPU
             ans_cpu_usage = measure_cpu_usage(tans_encode, text, ans_table, iterations=iterations_cpu)
 
-            # Debugowanie
-            if print_debug:
-                decoded_ans = tans_decode(encoded_ans, encoded_ans_state, ans_table)
-                print(f"Decoded ANS: {decoded_ans}")
-
-            # Zapisz wyniki ANS
-            results["ANS Time"] = f"{ans_time:.5f} seconds"
-            results["ANS Compressed Size"] = f"{ans_compressed_size:.5f} bytes"
-
-            results["ANS Entropy"] = f"{ans_entropy:.5f} bits per symbol"
-            results["ANS Average Code Length"] = f"{ans_avg_code_len:.5f} bits per symbol"
-            results["ANS Ratio"] = f"{ans_ratio:.5f}"
-            results["ANS Information Gain"] = f"{ans_information_gain} bytes"
-            results["ANS Efficiency"] = f"{ans_efficiency:.5f}"
-            results["ANS Redundancy"] = f"{ans_redundancy:.5f} bits per symbol"
-
-            results["ANS Stability"] = f"mean={ans_stability[0]:.5f}, min={ans_stability[1]:.5f}, max={ans_stability[2]:.5f} seconds"
-            results["ANS Memory Usage"] = f"{ans_memory:.5f} MiB"
-            results["ANS CPU Usage"] = f"{ans_cpu_usage} %"
-
             print(f"{ans_time:.5f} seconds")
 
             # Zapis danych do Dataframe
@@ -339,9 +330,31 @@ if __name__ == '__main__':
                 ans_memory,
                 ans_cpu_usage
             ]
+
+            if save_to_txt:
+                # Debugowanie
+                if print_debug:
+                    decoded_ans = tans_decode(encoded_ans, encoded_ans_state, ans_table)
+                    print(f"Decoded ANS: {decoded_ans}")
+
+                # Zapisz wyniki ANS
+                results["ANS Time"] = f"{ans_time:.5f} seconds"
+                results["ANS Compressed Size"] = f"{ans_compressed_size:.5f} bytes"
+
+                results["ANS Entropy"] = f"{ans_entropy:.5f} bits per symbol"
+                results["ANS Average Code Length"] = f"{ans_avg_code_len:.5f} bits per symbol"
+                results["ANS Ratio"] = f"{ans_ratio:.5f}"
+                results["ANS Information Gain"] = f"{ans_information_gain} bytes"
+                results["ANS Efficiency"] = f"{ans_efficiency:.5f}"
+                results["ANS Redundancy"] = f"{ans_redundancy:.5f} bits per symbol"
+
+                results[
+                    "ANS Stability"] = f"mean={ans_stability[0]:.5f}, min={ans_stability[1]:.5f}, max={ans_stability[2]:.5f} seconds"
+                results["ANS Memory Usage"] = f"{ans_memory:.5f} MiB"
+                results["ANS CPU Usage"] = f"{ans_cpu_usage} %"
             
-            # Save results to file for each run
-            save_results_to_file(f"results_{language.lower()}.txt", results)
+                # Save results to file for each run
+                save_results_to_file(f"results_{language.lower()}.txt", results)
 
     # Zapisz wyniki do pliku CSV
     df.to_csv("results/results.csv", index=False)

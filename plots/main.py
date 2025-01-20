@@ -74,7 +74,7 @@ def generate_stability_boxplot(df):
 
 if __name__ == '__main__':
     # Ścieżka do pliku CSV
-    file_path = "../results/results.csv"
+    file_path = "../results/results_16_25.csv"
 
     # Mapowanie nazw języków z angielskiego na polski
     languages_translation = {

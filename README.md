@@ -1,2 +1,2 @@
 Projekt na przedmiot teoria informacji
-Analizuje on teksty w kilku językach.
+Analizuje on teksty "Małego Księcia" w kilku językach z wykorzystaniem algorytmu Huffman'a, ANS i arytmetycznego.

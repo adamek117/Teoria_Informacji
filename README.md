@@ -2,7 +2,7 @@
 **Projekt na przedmiot teoria informacji.** \
 Analizuje on tekst "Małego Księcia" w kilku językach (polski, angielski, francuski i węgierski) z wykorzystaniem algorytmu Huffman'a, ANS i arytmetycznego. \
 Każdy z algorytmów ma własną implementację \
-**Język**: Python.\
+**Język**: Python.
 
 
 **English below**
